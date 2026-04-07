@@ -88,15 +88,15 @@
     function updateBackground() {
     if (!isWorkMode) {
         // GitHubに上げたファイル名と一文字ずつ一致させる（大文字小文字も！）
-        catBg.style.backgroundImage = "url('cat_break.jpg')"; 
+        catBg.style.backgroundImage = "url('cat_break.jpeg')"; 
         label.innerText = "おやすみニャ〜";
         return;
     }
 
     if (time > 10 * 60) {
-        catBg.style.backgroundImage = "url('cat_start.jpg')";
+        catBg.style.backgroundImage = "url('cat_start.jpeg')";
     } else if (time > 5 * 60) {
-        catBg.style.backgroundImage = "url('cat_mid.png')"; // PNGならpngにする
+        catBg.style.backgroundImage = "url('cat_mid.jpeg')"; // PNGならpngにする
     } else {
         catBg.style.backgroundImage = "url('cat_finish.PNG')"; // 大文字ならPNGにする
     }
