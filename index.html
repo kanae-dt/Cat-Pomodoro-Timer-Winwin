@@ -16,11 +16,10 @@
             overflow: hidden;
         }
 
-        /* 枠のサイズは元のまま */
         .widget {
             background-color: white;
             width: 320px;
-            padding: 30px;
+            padding: 40px 30px;
             border-radius: 40px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.05);
@@ -44,30 +43,23 @@
 
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 6px 16px;
+            border-radius: 14px;
             font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            margin-bottom: 8px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            margin-bottom: 20px; /* メッセージがない分、少し余白を広げました */
             background-color: rgba(240, 240, 240, 0.8);
             color: #888;
-        }
-
-        .mode-label {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 15px;
-            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .time {
-            /* 🌟 ここがポイント：コロンと丸みのある太いフォント */
             font-family: "Varela Round", sans-serif;
-            font-size: 80px;
-            font-weight: 400; /* このフォントは400でも十分太いです */
+            font-size: 84px;
+            font-weight: 400;
             color: #1d1d1f;
-            margin: 0 0 25px 0;
+            margin: 0 0 35px 0;
             font-variant-numeric: tabular-nums;
             line-height: 1;
         }
@@ -76,17 +68,19 @@
             background-color: #ff8e88;
             color: white;
             border: none;
-            padding: 16px 0;
-            border-radius: 20px;
-            font-weight: 600;
+            padding: 18px 0;
+            border-radius: 22px;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
-            font-size: 16px;
+            font-size: 17px;
+            letter-spacing: 0.05em;
             transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(255, 142, 136, 0.2);
         }
 
         .start-btn:hover { opacity: 0.9; }
-        .start-btn:active { transform: scale(0.98); }
+        .start-btn:active { transform: scale(0.97); }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,7 +91,6 @@
 <div class="widget">
     <div id="catBg"></div>
     <span class="status-badge" id="statusBadge">FOCUS</span>
-    <div class="mode-label" id="modeLabel">Session started</div>
     <div class="time" id="timerDisplay">25:00</div>
     <button class="start-btn" id="startBtn" onclick="toggle()">START</button>
 </div>
@@ -110,30 +103,43 @@
 
     const catBg = document.getElementById('catBg');
     const display = document.getElementById('timerDisplay');
-    const label = document.getElementById('modeLabel');
     const badge = document.getElementById('statusBadge');
     const startBtn = document.getElementById('startBtn');
+
+    function playAlarm() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+    }
 
     function updateBackground() {
         if (!isWorkMode) {
             catBg.style.backgroundImage = "url('cat_break.jpeg')";
             badge.innerText = "BREAK";
-            label.innerText = "Take a short break";
+            badge.style.backgroundColor = "#e1f5fe";
+            badge.style.color = "#039be5";
             return;
         }
 
+        badge.style.backgroundColor = "#fff0f0";
+        badge.style.color = "#ff5a5f";
+        
         if (time > 10 * 60) {
             catBg.style.backgroundImage = "url('cat_start.jpeg')";
             badge.innerText = "FOCUS";
-            label.innerText = "Session started";
         } else if (time > 5 * 60) {
             catBg.style.backgroundImage = "url('cat_mid.jpeg')";
             badge.innerText = "FOCUS";
-            label.innerText = "10 minutes left";
         } else {
             catBg.style.backgroundImage = "url('cat_finish.PNG')";
             badge.innerText = "FOCUS";
-            label.innerText = "5 minutes left";
         }
     }
 
@@ -165,6 +171,8 @@
     function finish() {
         clearInterval(interval);
         running = false;
+        playAlarm();
+        
         if (isWorkMode) {
             isWorkMode = false;
             time = 5 * 60;
@@ -172,9 +180,11 @@
             isWorkMode = true;
             time = 25 * 60;
         }
+        
         updateDisplay();
         updateBackground();
         startBtn.innerText = "START";
+        startBtn.style.backgroundColor = "#ff8e88";
     }
 
     updateBackground();
