@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ねこ応援タイマー</title>
+    <style>
+        body {
+            background-color: #fdf6f0;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* 背景画像エリア */
+        .cat-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1.0s ease-in-out; /* ふわっと切り替わる */
+        }
+
+        /* ウィジェット本体（よりシンプルに） */
+        .widget {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            width: 200px;
+            padding: 20px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .mode-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff8e88;
+            margin-bottom: 5px;
+        }
+
+        .time {
+            font-size: 50px;
+            font-weight: bold;
+            color: #444;
+            margin: 10px 0;
+        }
+
+        .start-btn {
+            background-color: #ff8e88;
+            color: white;
+            border: none;
+            padding: 10px 0;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        /* 休憩ボタンなどは自動切り替えにするため、あえて消してシンプルにしました */
+    </style>
+</head>
+<body>
+
+<div class="cat-bg" id="catBg"></div>
+
+<div class="widget">
+    <div class="mode-label" id="modeLabel">集中タイムニャ！</div>
+    <div class="time" id="timerDisplay">25:00</div>
+    <button class="start-btn" id="startBtn" onclick="toggle()">START</button>
+</div>
+
+<script>
+    let time = 25 * 60;
+    let running = false;
+    let interval = null;
+    let isWorkMode = true;
+
+    const catBg = document.getElementById('catBg');
+    const display = document.getElementById('timerDisplay');
+    const label = document.getElementById('modeLabel');
+
+    // 画像の切り替えルール
+    function updateBackground() {
+    if (!isWorkMode) {
+        // GitHubに上げたファイル名と一文字ずつ一致させる（大文字小文字も！）
+        catBg.style.backgroundImage = "url('cat_break.jpg')"; 
+        label.innerText = "おやすみニャ〜";
+        return;
+    }
+
+    if (time > 10 * 60) {
+        catBg.style.backgroundImage = "url('cat_start.jpg')";
+    } else if (time > 5 * 60) {
+        catBg.style.backgroundImage = "url('cat_mid.png')"; // PNGならpngにする
+    } else {
+        catBg.style.backgroundImage = "url('cat_finish.PNG')"; // 大文字ならPNGにする
+    }
+}
+
+    function updateDisplay() {
+        let min = Math.floor(time / 60);
+        let sec = time % 60;
+        display.innerText = `${min}:${sec < 10 ? '0' + sec : sec}`;
+        document.title = display.innerText + " | ねこ応援";
+    }
+
+    function toggle() {
+        if (running) {
+            clearInterval(interval);
+            document.getElementById('startBtn').innerText = "RESUME";
+        } else {
+            interval = setInterval(() => {
+                time--;
+                updateDisplay();
+                updateBackground();
+                if (time <= 0) {
+                    finish();
+                }
+            }, 1000);
+            document.getElementById('startBtn').innerText = "STOP";
+        }
+        running = !running;
+    }
+
+    function finish() {
+        clearInterval(interval);
+        running = false;
+        new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+        
+        if (isWorkMode) {
+            alert("作業終了ニャ！5分休むニャ！");
+            isWorkMode = false;
+            time = 5 * 60;
+        } else {
+            alert("休憩終了ニャ！25分頑張るニャ！");
+            isWorkMode = true;
+            time = 25 * 60;
+        }
+        
+        updateDisplay();
+        updateBackground();
+        document.getElementById('startBtn').innerText = "START";
+    }
+
+    // 最初の一枚を表示
+    updateBackground();
+</script>
+
+</body>
+</html>
