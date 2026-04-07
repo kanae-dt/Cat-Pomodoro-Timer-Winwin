@@ -84,23 +84,25 @@
     const display = document.getElementById('timerDisplay');
     const label = document.getElementById('modeLabel');
 
-    // 画像の切り替えルール
+    // 画像の切り替えルール（ファイル名と拡張子を完全に一致させています）
     function updateBackground() {
-    if (!isWorkMode) {
-        // GitHubに上げたファイル名と一文字ずつ一致させる（大文字小文字も！）
-        catBg.style.backgroundImage = "url('cat_break.jpeg')"; 
-        label.innerText = "おやすみニャ〜";
-        return;
-    }
+        if (!isWorkMode) {
+            catBg.style.backgroundImage = "url('cat_break.jpeg')"; // jpegに変更
+            label.innerText = "おやすみニャ〜";
+            return;
+        }
 
-    if (time > 10 * 60) {
-        catBg.style.backgroundImage = "url('cat_start.jpeg')";
-    } else if (time > 5 * 60) {
-        catBg.style.backgroundImage = "url('cat_mid.jpeg')"; // PNGならpngにする
-    } else {
-        catBg.style.backgroundImage = "url('cat_finish.PNG')"; // 大文字ならPNGにする
+        if (time > 10 * 60) {
+            catBg.style.backgroundImage = "url('cat_start.jpeg')"; // jpegに変更
+            label.innerText = "集中タイムニャ！";
+        } else if (time > 5 * 60) {
+            catBg.style.backgroundImage = "url('cat_mid.jpeg')";   // jpegに変更
+            label.innerText = "あと少しニャ！";
+        } else {
+            catBg.style.backgroundImage = "url('cat_finish.PNG')"; // PNG (大文字) に変更
+            label.innerText = "全力応援中ニャ！";
+        }
     }
-}
 
     function updateDisplay() {
         let min = Math.floor(time / 60);
