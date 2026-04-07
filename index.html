@@ -2,11 +2,13 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ねこ応援タイマー</title>
     <style>
+        /* 背景画像の設定 */
         body {
             background-color: #fdf6f0;
-            font-family: sans-serif;
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,58 +17,68 @@
             overflow: hidden;
         }
 
-        /* 背景画像エリア */
-        .cat-bg {
+        #catBg {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
             background-size: cover;
             background-position: center;
-            transition: background-image 1.0s ease-in-out; /* ふわっと切り替わる */
+            transition: background-image 1.0s ease-in-out;
+            background-color: #fdf6f0;
         }
 
-        /* ウィジェット本体（よりシンプルに） */
+        /* タイマーの外観 */
         .widget {
-            background-color: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
-            width: 200px;
-            padding: 20px;
-            border-radius: 30px;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            width: 260px;
+            padding: 40px 20px;
+            border-radius: 40px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
 
         .mode-label {
-            font-size: 14px;
+            font-size: 18px;
             font-weight: bold;
             color: #ff8e88;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .time {
-            font-size: 50px;
+            font-size: 72px;
             font-weight: bold;
             color: #444;
-            margin: 10px 0;
+            margin: 10px 0 25px 0;
+            font-variant-numeric: tabular-nums;
         }
 
         .start-btn {
             background-color: #ff8e88;
             color: white;
             border: none;
-            padding: 10px 0;
-            border-radius: 15px;
+            padding: 15px 0;
+            border-radius: 25px;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
+            width: 80%;
+            font-size: 18px;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 142, 136, 0.3);
         }
-        
-        /* 休憩ボタンなどは自動切り替えにするため、あえて消してシンプルにしました */
+
+        .start-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
 
-<div class="cat-bg" id="catBg"></div>
+<!-- 背景画像を表示するエリア -->
+<div id="catBg"></div>
 
 <div class="widget">
     <div class="mode-label" id="modeLabel">集中タイムニャ！</div>
@@ -83,23 +95,27 @@
     const catBg = document.getElementById('catBg');
     const display = document.getElementById('timerDisplay');
     const label = document.getElementById('modeLabel');
+    const startBtn = document.getElementById('startBtn');
 
-    // 画像の切り替えルール（ファイル名と拡張子を完全に一致させています）
+    // GitHubのファイル名（大文字小文字・拡張子）に完全に合わせています
     function updateBackground() {
         if (!isWorkMode) {
-            catBg.style.backgroundImage = "url('cat_break.jpeg')"; // jpegに変更
+            catBg.style.backgroundImage = "url('cat_break.jpeg')";
             label.innerText = "おやすみニャ〜";
             return;
         }
 
         if (time > 10 * 60) {
-            catBg.style.backgroundImage = "url('cat_start.jpeg')"; // jpegに変更
+            // 25分〜10分
+            catBg.style.backgroundImage = "url('cat_start.jpeg')";
             label.innerText = "集中タイムニャ！";
         } else if (time > 5 * 60) {
-            catBg.style.backgroundImage = "url('cat_mid.jpeg')";   // jpegに変更
+            // 10分〜5分
+            catBg.style.backgroundImage = "url('cat_mid.jpeg')";
             label.innerText = "あと少しニャ！";
         } else {
-            catBg.style.backgroundImage = "url('cat_finish.PNG')"; // PNG (大文字) に変更
+            // 5分〜0分
+            catBg.style.backgroundImage = "url('cat_finish.PNG')";
             label.innerText = "全力応援中ニャ！";
         }
     }
@@ -114,7 +130,8 @@
     function toggle() {
         if (running) {
             clearInterval(interval);
-            document.getElementById('startBtn').innerText = "RESUME";
+            startBtn.innerText = "RESUME";
+            startBtn.style.backgroundColor = "#ffb388";
         } else {
             interval = setInterval(() => {
                 time--;
@@ -124,7 +141,8 @@
                     finish();
                 }
             }, 1000);
-            document.getElementById('startBtn').innerText = "STOP";
+            startBtn.innerText = "STOP";
+            startBtn.style.backgroundColor = "#ff8e88";
         }
         running = !running;
     }
@@ -132,8 +150,6 @@
     function finish() {
         clearInterval(interval);
         running = false;
-        new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
-        
         if (isWorkMode) {
             alert("作業終了ニャ！5分休むニャ！");
             isWorkMode = false;
@@ -143,14 +159,14 @@
             isWorkMode = true;
             time = 25 * 60;
         }
-        
         updateDisplay();
         updateBackground();
-        document.getElementById('startBtn').innerText = "START";
+        startBtn.innerText = "START";
     }
 
-    // 最初の一枚を表示
+    // 最初にページを開いた時にも背景を表示させる
     updateBackground();
+    updateDisplay();
 </script>
 
 </body>
